@@ -5,7 +5,7 @@
 \alias{StatPseudcolorBinned}
 \title{Custom Stat for Binned KDE Pseudocolor Density}
 \format{
-An object of class \code{StatPseudocolorBinned} (inherits from \code{Stat}, \code{ggproto}, \code{gg}) of length 3.
+An object of class \code{StatPseudcolorBinned} (inherits from \code{Stat}, \code{ggproto}, \code{gg}) of length 3.
 }
 \usage{
 StatPseudcolorBinned
