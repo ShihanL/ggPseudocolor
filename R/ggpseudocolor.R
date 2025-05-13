@@ -1,4 +1,4 @@
-#' Custom Stat for Binned Pseudocolor Density
+#' Custom Stat for Binned KDE Pseudocolor Density
 #'
 #' Uses 2D kernel density estimation to assign discrete color bins to scatter points.
 #' @keywords internal
@@ -15,9 +15,9 @@ StatPseudcolorBinned <- ggplot2::ggproto("StatPseudocolorBinned", ggplot2::Stat,
                                   }
 )
 
-#' Custom Stat for Binned Pseudocolor Density
+#' Custom Stat for Continuous KDE Pseudocolor Density
 #'
-#' Uses 2D kernel density estimation to assign continous color to scatter points.
+#' Uses 2D kernel density estimation to assign continuous color to scatter points.
 #' @keywords internal
 StatPseudocolor <- ggplot2::ggproto("StatPseudocolor", ggplot2::Stat,
                                   required_aes = c("x", "y"),
@@ -34,30 +34,53 @@ StatPseudocolor <- ggplot2::ggproto("StatPseudocolor", ggplot2::Stat,
 
 
 
-#' Custom Stat for Binned Pseudocolor Density
+#' Stat for nearest neighbour distance Pseudocolor Density
 #'
-#' Uses 2D kernel density estimation to assign continous color to scatter points.
+#' Calculate density based on mean Euclidean distance of nearest neighbours
 #' @keywords internal
 StatNN <- ggplot2::ggproto("StatNN", ggplot2::Stat,
                                     required_aes = c("x", "y"),
 
-                                    compute_group = function(data, scales, n) {
-                                        print(data.frame(as.numeric(data$x),
-                                                         as.numeric(data$y)))
+                                    compute_group = function(data, scales, k) {
                                         neighbour_dist = FNN::get.knn(data.frame(as.numeric(data$x),
                                                                                  as.numeric(data$y)),
-                                                                      k = n)
+                                                                      k = k)
                                         data$density <- -log(rowMeans(neighbour_dist$nn.dist))
                                         data
                                     }
 )
 
+#' Custom Stat for number of nearest neighbours
+#'
+#' Calculate number of nearest neighbours within a specified radius
+#' @keywords internal
+StatNNCount <- ggplot2::ggproto("StatNNCount", ggplot2::Stat,
+                           required_aes = c("x", "y"),
 
+                           compute_group = function(data, scales, r) {
+                               neighbour_dist = FNN::get.knn(data.frame(as.numeric(data$x),
+                                                                        as.numeric(data$y)),
+                                                             k = length(data$x) * 0.2)
+                               counts = apply(neighbour_dist$nn.dist, FUN=function(x){
+                                   counts = table(x < r)
+                                   ifelse(is.na(counts['TRUE']), 0, counts['TRUE'])
+
+
+                               }, MARGIN=1)
+                               data$density <- counts
+                               data
+                           }
+)
+
+#' geom_pseudocolor
+#'
 #' @rdname geom_pseudocolor
 #' @param bins Number of bins to split densitities into
 #' @param n Resolution of the KDE grid
 #' @param h KDE bandwidth
-#' @param stat Two possible options: pseudocolor which plots densitites as a continuous spectrum and
+#' @param k Number of nearest neighbours
+#' @param r
+#' @param stat Four possible options: pseudocolor which plots densitites as a continuous spectrum and
 #' pseudocolor_binned which groups densities into n bins
 #' @export
 geom_pseudocolor <- function(mapping = NULL, data = NULL,
@@ -107,9 +130,23 @@ geom_pseudocolor <- function(mapping = NULL, data = NULL,
                 position = position,
                 show.legend = show.legend,
                 inherit.aes = inherit.aes,
-                params = list(n = n, ...)
+                params = list(k = k, ...)
             )
         }
+
+    if(stat == 'pseudocolor_nn_count'){
+        layer <- ggplot2::layer(
+            stat = StatNNCount,
+            geom = ggplot2::GeomPoint,
+            mapping = modifyList(mapping %||% ggplot2::aes(),
+                                 ggplot2::aes(color = ggplot2::after_stat(density))),
+            data = data,
+            position = position,
+            show.legend = show.legend,
+            inherit.aes = inherit.aes,
+            params = list(r = r, ...)
+        )
+    }
 
     list(
         layer
@@ -119,18 +156,17 @@ geom_pseudocolor <- function(mapping = NULL, data = NULL,
 
 
 
-#df <- data.frame(x=c(rnorm(1000, mean = 0,sd =1 ),
-#                          rnorm(1000, mean = 5,sd =1 ),
-#                          sample(seq(-5,10,0.001), size = 1000, replace = T)),
-#                 y=c(rnorm(1000, mean = 0,sd =1 ),
-#                          rnorm(1000, mean = 2,sd =1 ),
-#                          sample(seq(-5,10, 0.001), size = 1000, replace = T)))
-#
-#
-#ggplot2::ggplot(df, ggplot2::aes(x=x,y=y)) +
-#    geom_pseudocolor(stat='pseudocolor_nn', n=10) +
-#    theme_minimal() +
-#    scale_color_viridis_c()
+df <- data.frame(x=c(rnorm(1000, mean = 0,sd =1 ),
+                          rnorm(1000, mean = 5,sd =2 ),
+                          sample(seq(-5,10,0.001), size = 1000, replace = T)),
+                 y=c(rnorm(1000, mean = 0,sd =1 ),
+                          rnorm(1000, mean = 2,sd =1 ),
+                          sample(seq(-5,10, 0.001), size = 1000, replace = T)))
+
+
+ggplot2::ggplot(df, ggplot2::aes(x=x,y=y)) +
+    geom_pseudocolor(stat='pseudocolor') +
+    theme_minimal() + scale_color_viridis_c()
 
 
 
