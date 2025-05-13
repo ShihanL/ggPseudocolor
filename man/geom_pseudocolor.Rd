@@ -19,9 +19,9 @@ geom_pseudocolor(
 }
 \arguments{
 \item{stat}{Four possible options:
-pseudocolor: calculates densitites as a continuous spectrum, requires bins, n, h \n
-pseudocolor_binned: groups densities into bins, requires bins, n, h \n
-pseudocolor_nn: calculates euclidan distance of nearest neighbours, requires k \n
+pseudocolor: calculates densitites as a continuous spectrum, requires bins, n, h \\n
+pseudocolor_binned: groups densities into bins, requires bins, n, h \\n
+pseudocolor_nn: calculates euclidan distance of nearest neighbours, requires k \\n
 pseudocolor_nn_count: counts number nearest neighbours, requires r}
 
 \item{bins}{Number of bins to split densitities into}
