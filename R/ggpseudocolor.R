@@ -44,10 +44,10 @@ StatNN <- ggplot2::ggproto("StatNN", ggplot2::Stat,
                                     compute_group = function(data, scales, n) {
                                         print(data.frame(as.numeric(data$x),
                                                          as.numeric(data$y)))
-                                        neighbour_dist = FNN::get.knn(data.frame(as.numeric(data$x),
-                                                                                 as.numeric(data$y)),
-                                                                      k = n)
-                                        data$density <- rowMeans(neighbour_dist$nn.dist)
+                                        #neighbour_dist = FNN::get.knn(data.frame(as.numeric(data$x),
+                                        #                                         as.numeric(data$y)),
+                                        #                              k = n)
+                                        data$density <- rowMeans(data$x)
                                         data
                                     }
 )
