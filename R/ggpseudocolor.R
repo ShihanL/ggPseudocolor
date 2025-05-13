@@ -4,7 +4,7 @@
 #' @keywords internal
 #' @importFrom MASS kde2d
 #' @importFrom fields interp.surface
-StatPseudcolorBinned <- ggplot2::ggproto("StatPseudocolorBinned", ggplot2::Stat,
+StatPseudcolorBinned <- ggplot2::ggproto("StatPseudcolorBinned", ggplot2::Stat,
                                   required_aes = c("x", "y"),
                                   compute_group = function(data, scales, bins = 5,
                                                            n = 100, h = 1) {
@@ -66,7 +66,7 @@ StatNNCount <- ggplot2::ggproto("StatNNCount", ggplot2::Stat,
                            compute_group = function(data, scales, r) {
                                neighbour_dist = FNN::get.knn(data.frame(as.numeric(data$x),
                                                                         as.numeric(data$y)),
-                                                             k = length(data$x) * 0.2)
+                                                             k = k)
                                counts = apply(neighbour_dist$nn.dist, FUN=function(x){
                                    counts = table(x < r)
                                    ifelse(is.na(counts['TRUE']), 0, counts['TRUE'])
@@ -111,7 +111,7 @@ geom_pseudocolor <- function(mapping = NULL,
 
     if(stat == 'pseudocolor_binned'){
     layer <- ggplot2::layer(
-        stat = StatPseudocolorBinned,
+        stat = StatPseudcolorBinned,
         geom = ggplot2::GeomPoint,
         mapping = modifyList(mapping %||% ggplot2::aes(),
                              ggplot2::aes(color = ggplot2::after_stat(density_bin))),
@@ -161,7 +161,7 @@ geom_pseudocolor <- function(mapping = NULL,
             position = position,
             show.legend = show.legend,
             inherit.aes = inherit.aes,
-            params = list(r = r, ...)
+            params = list(r = r, k=k ...)
         )
     }
 
