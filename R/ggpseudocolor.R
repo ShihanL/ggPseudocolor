@@ -2,7 +2,7 @@
 #'
 #' Uses 2D kernel density estimation to assign discrete color bins to scatter points.
 #' @keywords internal
-StatPseudocolorBinned <- ggplot2::ggproto("StatPseudocolorBinned", ggplot2::Stat,
+StatPseudcolorBinned <- ggplot2::ggproto("StatPseudocolorBinned", ggplot2::Stat,
                                   required_aes = c("x", "y"),
                                   compute_group = function(data, scales, bins = 5,
                                                            n = 100, h = 1) {
@@ -30,6 +30,28 @@ StatPseudocolor <- ggplot2::ggproto("StatPseudocolor", ggplot2::Stat,
                                       data
                                   }
 )
+
+
+
+
+#' Custom Stat for Binned Pseudocolor Density
+#'
+#' Uses 2D kernel density estimation to assign continous color to scatter points.
+#' @keywords internal
+StatNN <- ggplot2::ggproto("StatNN", ggplot2::Stat,
+                                    required_aes = c("x", "y"),
+
+                                    compute_group = function(data, scales, n) {
+                                        neighbour_dist = FNN::get.knn(df, k = n)$nn.dist
+
+                                        data$density <-apply(X =neighbour_dist,
+                                                             FUN = function(x){-log(mean(x))},
+                                                             MARGIN = 1)
+
+                                        data
+                                    }
+)
+
 
 #' @rdname geom_pseudocolor
 #' @param bins Number of bins to split densitities into
@@ -64,7 +86,7 @@ geom_pseudocolor <- function(mapping = NULL, data = NULL,
     if(stat == 'pseudocolor'){
         layer <- ggplot2::layer(
             stat = StatPseudocolor,
-            geom = GeomPoint,
+            geom = ggplot2::GeomPoint,
             mapping = modifyList(mapping %||% ggplot2::aes(),
                                  ggplot2::aes(color = ggplot2::after_stat(density))),
             data = data,
@@ -73,9 +95,21 @@ geom_pseudocolor <- function(mapping = NULL, data = NULL,
             inherit.aes = inherit.aes,
             params = list(bins = bins, n = n, h = h, ...)
         )
+        }
 
-
-    }
+        if(stat == 'pseudocolor_nn'){
+            layer <- ggplot2::layer(
+                stat = StatNN,
+                geom = ggplot2::GeomPoint,
+                mapping = modifyList(mapping %||% ggplot2::aes(),
+                                     ggplot2::aes(color = ggplot2::after_stat(density))),
+                data = data,
+                position = position,
+                show.legend = show.legend,
+                inherit.aes = inherit.aes,
+                params = list(bins = bins, n = n, h = h, ...)
+            )
+        }
 
     list(
         layer
@@ -83,9 +117,20 @@ geom_pseudocolor <- function(mapping = NULL, data = NULL,
 }
 
 
-#df <- data.frame(x=append(rnorm(5000, mean = 0,sd =1 ), rnorm(5000, mean = 5,sd =1 )),
-#                 y=append(rnorm(5000, mean = 0,sd =1 ), rnorm(5000, mean = 5,sd =1 )))
 
-#ggplot2::ggplot(df, ggplot2::aes(x=x,y=y)) +
-#   geom_pseudocolor(n = 100, h = 1, size=0.5, stat='pseudocolor_binned') +
-#    theme_minimal()
+
+df <- data.frame(x=c(rnorm(1000, mean = 0,sd =1 ),
+                          rnorm(1000, mean = 5,sd =1 ),
+                          sample(seq(-5,10,0.001), size = 1000, replace = T)),
+                 y=c(rnorm(1000, mean = 0,sd =1 ),
+                          rnorm(1000, mean = 2,sd =1 ),
+                          sample(seq(-5,10, 0.001), size = 1000, replace = T)))
+
+
+ggplot2::ggplot(df, ggplot2::aes(x=x,y=y)) +
+    geom_pseudocolor(stat='pseudocolor_nn', n=10) +
+    theme_minimal() +
+    scale_color_viridis_c()
+
+
+
