@@ -42,11 +42,10 @@ StatNN <- ggplot2::ggproto("StatNN", ggplot2::Stat,
                                     required_aes = c("x", "y"),
 
                                     compute_group = function(data, scales, n) {
-                                        neighbour_dist = FNN::get.knn(data.frame(data$x, data$y), k = n)$nn.dist
+                                        neighbour_dist = FNN::get.knn(data.frame(as.numeric(data$x),
+                                                                                 as.numeric(data$y), k = n))
 
-                                        data$density <-apply(X =neighbour_dist,
-                                                             FUN = function(x){-log(mean(x))},
-                                                             MARGIN = 1)
+                                        data$density <- rowMeans(knn_result$nn.dist)
 
                                         data
                                     }
