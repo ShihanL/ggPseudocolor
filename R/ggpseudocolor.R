@@ -95,13 +95,18 @@ StatNNCount <- ggplot2::ggproto("StatNNCount", ggplot2::Stat,
 #' pseudocolor_nn_count: counts number nearest neighbours, requires r
 #' @import ggplot2
 #' @export
-geom_pseudocolor <- function(mapping = NULL, data = NULL,
-                                     stat = "pseudocolor",
-                                     position = "identity",
-                                     bins = 5, n = 100, h = 1,
-                                     show.legend = T,
-                                     inherit.aes = TRUE,
-                                     ...) {
+geom_pseudocolor <- function(mapping = NULL,
+                             data = NULL,
+                             stat = "pseudocolor",
+                             position = "identity",
+                             bins = 5,
+                             n = 100,
+                             h = 1,
+                             k=100,
+                             r=0.5,
+                             show.legend = T,
+                             inherit.aes = TRUE,
+                             ...) {
     # Create the layer and add the color scale
 
     if(stat == 'pseudocolor_binned'){
