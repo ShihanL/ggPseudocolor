@@ -2,6 +2,8 @@
 #'
 #' Uses 2D kernel density estimation to assign discrete color bins to scatter points.
 #' @keywords internal
+#' @importFrom MASS kde2d
+#' @importFrom fields interp.surface
 StatPseudcolorBinned <- ggplot2::ggproto("StatPseudocolorBinned", ggplot2::Stat,
                                   required_aes = c("x", "y"),
                                   compute_group = function(data, scales, bins = 5,
@@ -19,6 +21,8 @@ StatPseudcolorBinned <- ggplot2::ggproto("StatPseudocolorBinned", ggplot2::Stat,
 #'
 #' Uses 2D kernel density estimation to assign continuous color to scatter points.
 #' @keywords internal
+#' @importFrom MASS kde2d
+#' @importFrom fields interp.surface
 StatPseudocolor <- ggplot2::ggproto("StatPseudocolor", ggplot2::Stat,
                                   required_aes = c("x", "y"),
 
@@ -37,6 +41,7 @@ StatPseudocolor <- ggplot2::ggproto("StatPseudocolor", ggplot2::Stat,
 #' Stat for nearest neighbour distance Pseudocolor Density
 #'
 #' Calculate density based on mean Euclidean distance of nearest neighbours
+#' @importFrom FNN get.knn
 #' @keywords internal
 StatNN <- ggplot2::ggproto("StatNN", ggplot2::Stat,
                                     required_aes = c("x", "y"),
@@ -53,6 +58,7 @@ StatNN <- ggplot2::ggproto("StatNN", ggplot2::Stat,
 #' Custom Stat for number of nearest neighbours
 #'
 #' Calculate number of nearest neighbours within a specified radius
+#'@importFrom FNN get.knn
 #' @keywords internal
 StatNNCount <- ggplot2::ggproto("StatNNCount", ggplot2::Stat,
                            required_aes = c("x", "y"),
@@ -74,14 +80,20 @@ StatNNCount <- ggplot2::ggproto("StatNNCount", ggplot2::Stat,
 
 #' geom_pseudocolor
 #'
+#' Creates pseudocolor point plot with specified stat calculation
+#'
 #' @rdname geom_pseudocolor
 #' @param bins Number of bins to split densitities into
 #' @param n Resolution of the KDE grid
 #' @param h KDE bandwidth
 #' @param k Number of nearest neighbours
-#' @param r
-#' @param stat Four possible options: pseudocolor which plots densitites as a continuous spectrum and
-#' pseudocolor_binned which groups densities into n bins
+#' @param r Maximum distance to classify as nearest neighbour
+#' @param stat Four possible options:
+#' pseudocolor: calculates densitites as a continuous spectrum, requires bins, n, h
+#' pseudocolor_binned: groups densities into bins, requires bins, n, h
+#' pseudocolor_nn: calculates euclidan distance of nearest neighbours, requires k
+#' pseudocolor_nn_count: counts number nearest neighbours, requires r
+#' @import ggplot2
 #' @export
 geom_pseudocolor <- function(mapping = NULL, data = NULL,
                                      stat = "pseudocolor",
