@@ -1,3 +1,19 @@
+flojo_colors <- function(n = 256) {
+    colorRampPalette(c(
+        "#000000",  # Black
+        "#0000FF",  # Blue
+        "#00FFFF",  # Cyan
+        "#00FF00",  # Green
+        "#FFFF00",  # Yellow
+        "#FF0000",  # Red
+    ))(n)
+}
+
+scale_color_flojo <- function(...) {
+    ggplot2::scale_color_gradientn(colors = flojo_colors(), ...)
+}
+
+
 #' Custom Stat for Binned KDE Pseudocolor Density
 #'
 #' Uses 2D kernel density estimation to assign discrete color bins to scatter points.
@@ -9,8 +25,8 @@ StatPseudcolorBinned <- ggplot2::ggproto("StatPseudcolorBinned", ggplot2::Stat,
                                   compute_group = function(data, scales, bins = 5,
                                                            n = 100, h = NULL) {
                                       if(length(is.na(h)) == 0){
-                                          h=c(MASS::bandwidth.nrd(df$x),
-                                              MASS::bandwidth.nrd(df$y))
+                                          h=c(MASS::bandwidth.nrd(data$x),
+                                              MASS::bandwidth.nrd(data$y))
                                       }
                                       cat(paste0("Bandwidth: ", h))
                                       dens <- MASS::kde2d(data$x, data$y, n = n, h = h)
@@ -35,8 +51,8 @@ StatPseudocolor <- ggplot2::ggproto("StatPseudocolor", ggplot2::Stat,
                                                            n = 100, h = NULL) {
 
                                       if(length(is.na(h)) == 0){
-                                          h=c(MASS::bandwidth.nrd(df$x),
-                                              MASS::bandwidth.nrd(df$y))
+                                          h=c(MASS::bandwidth.nrd(data$x),
+                                              MASS::bandwidth.nrd(data$y))
                                       }
                                       cat(paste0("Bandwidth: ", h))
                                       dens <- MASS::kde2d(data$x, data$y, n = n, h = h)
