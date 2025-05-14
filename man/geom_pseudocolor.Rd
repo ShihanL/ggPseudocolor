@@ -20,11 +20,11 @@ geom_pseudocolor(
 )
 }
 \arguments{
-\item{stat}{Four possible options:
-pseudocolor: calculates densitites as a continuous spectrum, requires bins, n, h \cr
+\item{stat}{Four possible options:  \c
+pseudocolor: calculates densitites as a continuous spectrum, requires bins, n, hr
 pseudocolor_binned: groups densities into bins, requires bins, n, h \cr
 pseudocolor_nn: calculates euclidan distance of nearest neighbours, requires k \cr
-pseudocolor_nn_count: counts number nearest neighbours, requires r}
+pseudocolor_nn_count: counts number nearest neighbours, requires k, r}
 
 \item{bins}{Number of bins to split densitities into}
 

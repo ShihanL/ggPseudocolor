@@ -14,3 +14,7 @@ License: X
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.2
+Imports: 
+  fields (>= 16.3.1), 
+  MASS (>= 7.3-64),
+  ggplot2 (>= 3.5.1),
