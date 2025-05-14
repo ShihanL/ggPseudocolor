@@ -88,11 +88,11 @@ StatNNCount <- ggplot2::ggproto("StatNNCount", ggplot2::Stat,
 #' @param h KDE bandwidth
 #' @param k Number of nearest neighbours
 #' @param r Maximum distance to classify as nearest neighbour
-#' @param stat Four possible options:
-#'  pseudocolor: calculates densitites as a continuous spectrum, requires bins, n, h \cr
+#' @param stat Four possible options:  \c
+#'  pseudocolor: calculates densitites as a continuous spectrum, requires bins, n, hr
 #'  pseudocolor_binned: groups densities into bins, requires bins, n, h \cr
 #'  pseudocolor_nn: calculates euclidan distance of nearest neighbours, requires k \cr
-#'  pseudocolor_nn_count: counts number nearest neighbours, requires r
+#'  pseudocolor_nn_count: counts number nearest neighbours, requires k, r
 #' @import ggplot2
 #' @export
 geom_pseudocolor <- function(mapping = NULL,
