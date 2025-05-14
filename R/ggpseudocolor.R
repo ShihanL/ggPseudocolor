@@ -7,7 +7,11 @@
 StatPseudcolorBinned <- ggplot2::ggproto("StatPseudcolorBinned", ggplot2::Stat,
                                   required_aes = c("x", "y"),
                                   compute_group = function(data, scales, bins = 5,
-                                                           n = 100, h = 1) {
+                                                           n = 100, h = NULL) {
+                                      if(length(is.na(h)) == 0){
+                                          h=c(MASS::bandwidth.nrd(df$x),
+                                              MASS::bandwidth.nrd(df$y))
+                                      }
                                       dens <- MASS::kde2d(data$x, data$y, n = n, h = h)
                                       grid <- list(x = dens$x, y = dens$y, z = dens$z)
                                       dvals <- fields::interp.surface(grid, cbind(data$x, data$y))
@@ -27,7 +31,12 @@ StatPseudocolor <- ggplot2::ggproto("StatPseudocolor", ggplot2::Stat,
                                   required_aes = c("x", "y"),
 
                                   compute_group = function(data, scales, bins = 5,
-                                                           n = 100, h = 1) {
+                                                           n = 100, h = NULL) {
+
+                                      if(length(is.na(h)) == 0){
+                                          h=c(MASS::bandwidth.nrd(df$x),
+                                              MASS::bandwidth.nrd(df$y))
+                                      }
                                       dens <- MASS::kde2d(data$x, data$y, n = n, h = h)
                                       grid <- list(x = dens$x, y = dens$y, z = dens$z)
                                       data$density <- fields::interp.surface(grid, cbind(data$x, data$y))
@@ -101,7 +110,7 @@ geom_pseudocolor <- function(mapping = NULL,
                              position = "identity",
                              bins = 5,
                              n = 100,
-                             h = 1,
+                             h=NULL,
                              k=100,
                              r=0.5,
                              show.legend = T,
