@@ -172,18 +172,3 @@ geom_pseudocolor <- function(mapping = NULL,
 
 
 
-
-df <- data.frame(x=c(rnorm(1000, mean = 0,sd =1 ),
-                          rnorm(1000, mean = 5,sd =2 ),
-                          sample(seq(-5,10,0.001), size = 1000, replace = T)),
-                 y=c(rnorm(1000, mean = 0,sd =1 ),
-                          rnorm(1000, mean = 2,sd =1 ),
-                          sample(seq(-5,10, 0.001), size = 1000, replace = T)))
-
-
-ggplot2::ggplot(df, ggplot2::aes(x=x,y=y)) +
-    geom_pseudocolor(stat='pseudocolor') +
-    theme_minimal() + scale_color_viridis_c()
-
-
-
