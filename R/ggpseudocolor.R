@@ -12,6 +12,7 @@ StatPseudcolorBinned <- ggplot2::ggproto("StatPseudcolorBinned", ggplot2::Stat,
                                           h=c(MASS::bandwidth.nrd(df$x),
                                               MASS::bandwidth.nrd(df$y))
                                       }
+                                      cat(paste0("Bandwidth: ", h))
                                       dens <- MASS::kde2d(data$x, data$y, n = n, h = h)
                                       grid <- list(x = dens$x, y = dens$y, z = dens$z)
                                       dvals <- fields::interp.surface(grid, cbind(data$x, data$y))
@@ -37,6 +38,7 @@ StatPseudocolor <- ggplot2::ggproto("StatPseudocolor", ggplot2::Stat,
                                           h=c(MASS::bandwidth.nrd(df$x),
                                               MASS::bandwidth.nrd(df$y))
                                       }
+                                      cat(paste0("Bandwidth: ", h))
                                       dens <- MASS::kde2d(data$x, data$y, n = n, h = h)
                                       grid <- list(x = dens$x, y = dens$y, z = dens$z)
                                       data$density <- fields::interp.surface(grid, cbind(data$x, data$y))
@@ -76,6 +78,13 @@ StatNNCount <- ggplot2::ggproto("StatNNCount", ggplot2::Stat,
                                neighbour_dist = FNN::get.knn(data.frame(as.numeric(data$x),
                                                                         as.numeric(data$y)),
                                                              k = k)
+
+                               if(length(is.na(r)) == 0){
+                                   r =  quantile(neighbour_dist$nn.dist[,1], 0.75)
+
+                                   cat(paste0("Cutoff Distance: ", r))
+                               }
+
                                counts = apply(neighbour_dist$nn.dist, FUN=function(x){
                                    counts = table(x < r)
                                    ifelse(is.na(counts['TRUE']), 0, counts['TRUE'])
@@ -112,7 +121,7 @@ geom_pseudocolor <- function(mapping = NULL,
                              n = 100,
                              h=NULL,
                              k=100,
-                             r=0.5,
+                             r=NULL,
                              show.legend = T,
                              inherit.aes = TRUE,
                              ...) {
