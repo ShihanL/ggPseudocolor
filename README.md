@@ -1,4 +1,4 @@
-# ggPsueudocolor
+# ggPseudocolor
 
 ## Installation: 
 `devtools::install_github('https://github.com/ShihanL/ggPseudocolor')`
