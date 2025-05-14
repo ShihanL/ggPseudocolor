@@ -28,7 +28,7 @@ StatPseudcolorBinned <- ggplot2::ggproto("StatPseudcolorBinned", ggplot2::Stat,
                                           h=c(MASS::bandwidth.nrd(data$x),
                                               MASS::bandwidth.nrd(data$y))
                                       }
-                                      cat(paste0("Bandwidth: ", h))
+                                      cat(paste0("Bandwidth",c('x', 'y'),": ", h))
                                       dens <- MASS::kde2d(data$x, data$y, n = n, h = h)
                                       grid <- list(x = dens$x, y = dens$y, z = dens$z)
                                       dvals <- fields::interp.surface(grid, cbind(data$x, data$y))
@@ -54,7 +54,7 @@ StatPseudocolor <- ggplot2::ggproto("StatPseudocolor", ggplot2::Stat,
                                           h=c(MASS::bandwidth.nrd(data$x),
                                               MASS::bandwidth.nrd(data$y))
                                       }
-                                      cat(paste0("Bandwidth: ", h))
+                                      cat(paste0("Bandwidth",c('x', 'y'),": ", h))
                                       dens <- MASS::kde2d(data$x, data$y, n = n, h = h)
                                       grid <- list(x = dens$x, y = dens$y, z = dens$z)
                                       data$density <- fields::interp.surface(grid, cbind(data$x, data$y))
