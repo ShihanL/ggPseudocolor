@@ -11,9 +11,9 @@ geom_pseudocolor(
   position = "identity",
   bins = 5,
   n = 100,
-  h = 1,
+  h = NULL,
   k = 100,
-  r = 0.5,
+  r = NULL,
   show.legend = T,
   inherit.aes = TRUE,
   ...

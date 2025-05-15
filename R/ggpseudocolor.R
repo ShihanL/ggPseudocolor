@@ -1,19 +1,3 @@
-flojo_colors <- function(n = 256) {
-    colorRampPalette(c(
-        "#000000",  # Black
-        "#0000FF",  # Blue
-        "#00FFFF",  # Cyan
-        "#00FF00",  # Green
-        "#FFFF00",  # Yellow
-        "#FF0000",  # Red
-    ))(n)
-}
-
-scale_color_flojo <- function(...) {
-    ggplot2::scale_color_gradientn(colors = flojo_colors(), ...)
-}
-
-
 #' Custom Stat for Binned KDE Pseudocolor Density
 #'
 #' Uses 2D kernel density estimation to assign discrete color bins to scatter points.
@@ -62,9 +46,6 @@ StatPseudocolor <- ggplot2::ggproto("StatPseudocolor", ggplot2::Stat,
                                   }
 )
 
-
-
-
 #' Stat for nearest neighbour distance Pseudocolor Density
 #'
 #' Calculate density based on mean Euclidean distance of nearest neighbours
@@ -74,10 +55,10 @@ StatNN <- ggplot2::ggproto("StatNN", ggplot2::Stat,
                                     required_aes = c("x", "y"),
 
                                     compute_group = function(data, scales, k) {
-                                        neighbour_dist = FNN::get.knn(data.frame(as.numeric(data$x),
-                                                                                 as.numeric(data$y)),
+                                        neighbour_dist = FNN::get.knn(data.frame(scale(as.numeric(data$x)),
+                                                                                 scale(as.numeric(data$y))),
                                                                       k = k)
-                                        data$density <- -log(rowMeans(neighbour_dist$nn.dist))
+                                        data$mean_dist <- -log(rowMeans(neighbour_dist$nn.dist))
                                         data
                                     }
 )
@@ -91,8 +72,12 @@ StatNNCount <- ggplot2::ggproto("StatNNCount", ggplot2::Stat,
                            required_aes = c("x", "y"),
 
                            compute_group = function(data, scales, r, k) {
-                               neighbour_dist = FNN::get.knn(data.frame(as.numeric(data$x),
-                                                                        as.numeric(data$y)),
+
+                               x_weight = 1#MASS::bandwidth.nrd(data$y)
+                               y_weight = 1#MASS::bandwidth.nrd(data$x)
+
+                               neighbour_dist = FNN::get.knn(data.frame(scale(as.numeric(data$x)),
+                                                                        scale(as.numeric(data$y))),
                                                              k = k)
 
                                if(length(is.na(r)) == 0){
@@ -102,12 +87,9 @@ StatNNCount <- ggplot2::ggproto("StatNNCount", ggplot2::Stat,
                                }
 
                                counts = apply(neighbour_dist$nn.dist, FUN=function(x){
-                                   counts = table(x < r)
-                                   ifelse(is.na(counts['TRUE']), 0, counts['TRUE'])
-
-
+                                   counts = sum(x < r)
                                }, MARGIN=1)
-                               data$density <- counts
+                               data$neighbourhood_count <- counts
                                data
                            }
 )
@@ -176,7 +158,7 @@ geom_pseudocolor <- function(mapping = NULL,
                 stat = StatNN,
                 geom = ggplot2::GeomPoint,
                 mapping = modifyList(mapping %||% ggplot2::aes(),
-                                     ggplot2::aes(color = ggplot2::after_stat(density))),
+                                     ggplot2::aes(color = ggplot2::after_stat(mean_dist))),
                 data = data,
                 position = position,
                 show.legend = show.legend,
@@ -190,7 +172,7 @@ geom_pseudocolor <- function(mapping = NULL,
             stat = StatNNCount,
             geom = ggplot2::GeomPoint,
             mapping = modifyList(mapping %||% ggplot2::aes(),
-                                 ggplot2::aes(color = ggplot2::after_stat(density))),
+                                 ggplot2::aes(color = ggplot2::after_stat(neighbourhood_count))),
             data = data,
             position = position,
             show.legend = show.legend,
@@ -204,5 +186,33 @@ geom_pseudocolor <- function(mapping = NULL,
     )
 }
 
+#' Flowjo color palette
+#'#'
+#' @import grDevices
+#' @keywords internal
+flowjo_colors <- function(n = 256) {
+    grDevices::colorRampPalette(c(
+        "#0000FF",
+        "#00FFFF",
+        "#00FF00",
+        "#FFFF00",
+        "#FF0000"
+    ))(n)
+}
 
+#' Continuous color palette for flowjo colors
+#'
+#' @import ggplot2
+#' @export
+scale_color_flowjo <- function(...) {
+    ggplot2::scale_color_gradientn(colors = flojo_colors(), ...)
+}
+
+#' Continuous color palette for flowjo colors
+#'
+#' @import ggplot2
+#' @export
+scale_color_flowjo_discrete <- function(...) {
+    ggplot2::scale_color_manual(values = flojo_colors(5), ...)
+}
 
