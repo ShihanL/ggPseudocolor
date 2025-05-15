@@ -18,7 +18,7 @@ StatPseudcolorBinned <- ggplot2::ggproto("StatPseudcolorBinned", ggplot2::Stat,
                                       dvals <- fields::interp.surface(grid, cbind(data$x, data$y))
                                       bins_cut <- cut(dvals, breaks = bins, labels = FALSE)
                                       data$density_bin <- factor(bins_cut, levels = 1:bins)
-                                      data
+                                      dplyr::arrange(data, density_bin)
                                   }
 )
 
@@ -42,7 +42,7 @@ StatPseudocolor <- ggplot2::ggproto("StatPseudocolor", ggplot2::Stat,
                                       dens <- MASS::kde2d(data$x, data$y, n = n, h = h)
                                       grid <- list(x = dens$x, y = dens$y, z = dens$z)
                                       data$density <- fields::interp.surface(grid, cbind(data$x, data$y))
-                                      data
+                                      dplyr::arrange(data, density)
                                   }
 )
 
@@ -59,7 +59,7 @@ StatNN <- ggplot2::ggproto("StatNN", ggplot2::Stat,
                                                                                  scale(as.numeric(data$y))),
                                                                       k = k)
                                         data$mean_dist <- -log(rowMeans(neighbour_dist$nn.dist))
-                                        data
+                                        dplyr::arrange(data, mean_dist)
                                     }
 )
 
@@ -90,7 +90,8 @@ StatNNCount <- ggplot2::ggproto("StatNNCount", ggplot2::Stat,
                                    counts = sum(x < r)
                                }, MARGIN=1)
                                data$neighbourhood_count <- counts
-                               data
+                               dplyr::arrange(data, neighbourhood_count)
+
                            }
 )
 
@@ -205,7 +206,7 @@ flowjo_colors <- function(n = 256) {
 #' @import ggplot2
 #' @export
 scale_color_flowjo <- function(...) {
-    ggplot2::scale_color_gradientn(colors = flojo_colors(), ...)
+    ggplot2::scale_color_gradientn(colors = flowjo_colors(), ...)
 }
 
 #' Continuous color palette for flowjo colors
@@ -213,6 +214,6 @@ scale_color_flowjo <- function(...) {
 #' @import ggplot2
 #' @export
 scale_color_flowjo_discrete <- function(...) {
-    ggplot2::scale_color_manual(values = flojo_colors(5), ...)
+    ggplot2::scale_color_manual(values = flowjo_colors(5), ...)
 }
 
