@@ -10,7 +10,7 @@ geom_pseudocolor(
   stat = "pseudocolor",
   position = "identity",
   bins = 5,
-  n = 100,
+  n = NULL,
   h = NULL,
   k = 100,
   r = NULL,

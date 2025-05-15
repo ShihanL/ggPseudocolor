@@ -18,3 +18,5 @@ Imports:
   fields (>= 16.3.1), 
   MASS (>= 7.3-64),
   ggplot2 (>= 3.5.1),
+  FNN (>= 1.1.4.1),
+  KernSmooth (>= 2.23-26)

@@ -12,10 +12,25 @@ StatPseudcolorBinned <- ggplot2::ggproto("StatPseudcolorBinned", ggplot2::Stat,
                                           h=c(MASS::bandwidth.nrd(data$x),
                                               MASS::bandwidth.nrd(data$y))
                                       }
+
+
+                                      if(length(is.na(n)) == 0 | length(n) != 2){
+
+                                          n=c(100,100)
+
+                                      }
                                       cat(paste0("Bandwidth",c('x', 'y'),": ", h))
-                                      dens <- MASS::kde2d(data$x, data$y, n = n, h = h)
-                                      grid <- list(x = dens$x, y = dens$y, z = dens$z)
+                                      #dens <- MASS::kde2d(data$x, data$y, n = n, h = h)
+                                      #grid <- list(x = dens$x, y = dens$y, z = dens$z)
+                                      #dvals <- fields::interp.surface(grid, cbind(data$x, data$y))
+
+                                      dens <- KernSmooth::bkde2D(data.frame(data$x, data$y),
+                                                                 bandwidth = h,
+                                                                 gridsize = n)
+                                      grid <- list(x = dens$x1, y = dens$x2, z = dens$fhat)
                                       dvals <- fields::interp.surface(grid, cbind(data$x, data$y))
+
+
                                       bins_cut <- cut(dvals, breaks = bins, labels = FALSE)
                                       data$density_bin <- factor(bins_cut, levels = 1:bins)
                                       dplyr::arrange(data, density_bin)
@@ -26,21 +41,29 @@ StatPseudcolorBinned <- ggplot2::ggproto("StatPseudcolorBinned", ggplot2::Stat,
 #'
 #' Uses 2D kernel density estimation to assign continuous color to scatter points.
 #' @keywords internal
-#' @importFrom MASS kde2d
+#' @importFrom KernSmooth bkde2D
 #' @importFrom fields interp.surface
 StatPseudocolor <- ggplot2::ggproto("StatPseudocolor", ggplot2::Stat,
                                   required_aes = c("x", "y"),
 
                                   compute_group = function(data, scales, bins = 5,
-                                                           n = 100, h = NULL) {
+                                                           n = NULL, h = NULL) {
 
                                       if(length(is.na(h)) == 0){
                                           h=c(MASS::bandwidth.nrd(data$x),
                                               MASS::bandwidth.nrd(data$y))
                                       }
-                                      cat(paste0("Bandwidth",c('x', 'y'),": ", h))
-                                      dens <- MASS::kde2d(data$x, data$y, n = n, h = h)
-                                      grid <- list(x = dens$x, y = dens$y, z = dens$z)
+
+                                      if(length(is.na(n)) == 0 | length(n) != 2){
+
+                                          n=c(100,100)
+
+                                      }
+                                      cat(paste0("Bandwidth",c('_x', '_y'),": ", h, '\n', collapse = ''))
+                                      dens <- KernSmooth::bkde2D(data.frame(data$x, data$y),
+                                                                 bandwidth = h,
+                                                                 gridsize = n)
+                                      grid <- list(x = dens$x1, y = dens$x2, z = dens$fhat)
                                       data$density <- fields::interp.surface(grid, cbind(data$x, data$y))
                                       dplyr::arrange(data, density)
                                   }
@@ -111,16 +134,17 @@ StatNNCount <- ggplot2::ggproto("StatNNCount", ggplot2::Stat,
 #'  pseudocolor_nn: calculates euclidan distance of nearest neighbours, requires k \cr
 #'  pseudocolor_nn_count: counts number nearest neighbours, requires k, r
 #' @import ggplot2
+#' @importFrom utils modifyList
 #' @export
 geom_pseudocolor <- function(mapping = NULL,
                              data = NULL,
                              stat = "pseudocolor",
                              position = "identity",
                              bins = 5,
-                             n = 100,
-                             h=NULL,
-                             k=100,
-                             r=NULL,
+                             n = NULL,
+                             h= NULL,
+                             k= 100,
+                             r= NULL,
                              show.legend = T,
                              inherit.aes = TRUE,
                              ...) {
@@ -130,7 +154,7 @@ geom_pseudocolor <- function(mapping = NULL,
     layer <- ggplot2::layer(
         stat = StatPseudcolorBinned,
         geom = ggplot2::GeomPoint,
-        mapping = modifyList(mapping %||% ggplot2::aes(),
+        mapping = utils::modifyList(mapping %||% ggplot2::aes(),
                              ggplot2::aes(color = ggplot2::after_stat(density_bin))),
         data = data,
         position = position,
