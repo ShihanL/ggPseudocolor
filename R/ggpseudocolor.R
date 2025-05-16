@@ -159,7 +159,7 @@ geom_pseudocolor <- function(mapping = NULL,
                              r= NULL,
                              show.legend = T,
                              inherit.aes = TRUE,
-                             adjust=1
+                             adjust=1,
                              ...) {
     # Create the layer and add the color scale
 
@@ -187,7 +187,7 @@ geom_pseudocolor <- function(mapping = NULL,
             position = position,
             show.legend = show.legend,
             inherit.aes = inherit.aes,
-            params = list(bins = bins, n = n, h = h,adjust=adjust,  ...)
+            params = list(bins = bins, n = n, h = h,adjust=adjust, ...)
         )
         }
 
