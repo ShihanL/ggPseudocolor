@@ -16,7 +16,7 @@ StatPseudcolorBinned <- ggplot2::ggproto("StatPseudcolorBinned", ggplot2::Stat,
                                           }
                                       }
 
-                                      h=adjust * h
+                                      h= adjust * h
 
 
                                       if(length(is.na(n)) == 0 | length(n) != 2){
@@ -24,7 +24,7 @@ StatPseudcolorBinned <- ggplot2::ggproto("StatPseudcolorBinned", ggplot2::Stat,
                                           n=c(100,100)
 
                                       }
-                                      cat(paste0("Bandwidth",c('x', 'y'),": ", h))
+                                      #cat(paste0("Bandwidth",c('x', 'y'),": ", h))
 
                                       dens <- KernSmooth::bkde2D(data.frame(data$x, data$y),
                                                                  bandwidth = h,
@@ -51,7 +51,7 @@ StatPseudocolor <- ggplot2::ggproto("StatPseudocolor", ggplot2::Stat,
                                   required_aes = c("x", "y"),
 
                                   compute_group = function(data, scales, bins = 5,
-                                                           n = NULL, h = NULL) {
+                                                           n = NULL, h = NULL, adjust=1) {
 
                                       if(length(is.na(h)) == 0){
                                           h=c(KernSmooth::dpik(data$x),
@@ -69,7 +69,7 @@ StatPseudocolor <- ggplot2::ggproto("StatPseudocolor", ggplot2::Stat,
                                           n=c(100,100)
 
                                       }
-                                      cat(paste0("Bandwidth",c('_x', '_y'),": ", h, '\n', collapse = ''))
+                                      #cat(paste0("Bandwidth",c('_x', '_y'),": ", h, '\n', collapse = ''))
                                       dens <- KernSmooth::bkde2D(data.frame(data$x, data$y),
                                                                  bandwidth = h,
                                                                  gridsize = n)
