@@ -9,8 +9,11 @@ StatPseudcolorBinned <- ggplot2::ggproto("StatPseudcolorBinned", ggplot2::Stat,
                                   compute_group = function(data, scales, bins = 5,
                                                            n = 100, h = NULL) {
                                       if(length(is.na(h)) == 0){
-                                          h=c(MASS::bandwidth.nrd(data$x),
-                                              MASS::bandwidth.nrd(data$y))
+                                          h=c(KernSmooth::dpik(data$x),
+                                              KernSmooth::dpik(data$y))
+                                          if(0 %in% h){
+                                              h=ifelse(max(h) != 0, max(h), 1)
+                                          }
                                       }
 
 
@@ -20,9 +23,6 @@ StatPseudcolorBinned <- ggplot2::ggproto("StatPseudcolorBinned", ggplot2::Stat,
 
                                       }
                                       cat(paste0("Bandwidth",c('x', 'y'),": ", h))
-                                      #dens <- MASS::kde2d(data$x, data$y, n = n, h = h)
-                                      #grid <- list(x = dens$x, y = dens$y, z = dens$z)
-                                      #dvals <- fields::interp.surface(grid, cbind(data$x, data$y))
 
                                       dens <- KernSmooth::bkde2D(data.frame(data$x, data$y),
                                                                  bandwidth = h,
@@ -31,7 +31,9 @@ StatPseudcolorBinned <- ggplot2::ggproto("StatPseudcolorBinned", ggplot2::Stat,
                                       dvals <- fields::interp.surface(grid, cbind(data$x, data$y))
 
 
-                                      bins_cut <- cut(dvals, breaks = bins, labels = FALSE)
+                                      #bins_cut <- cut(dvals, breaks = bins, labels = FALSE)
+                                      bins_cut <- Hmisc::cut2(dvals, cuts = quantile(dvals))
+
                                       data$density_bin <- factor(bins_cut, levels = 1:bins)
                                       dplyr::arrange(data, density_bin)
                                   }
@@ -50,9 +52,13 @@ StatPseudocolor <- ggplot2::ggproto("StatPseudocolor", ggplot2::Stat,
                                                            n = NULL, h = NULL) {
 
                                       if(length(is.na(h)) == 0){
-                                          h=c(MASS::bandwidth.nrd(data$x),
-                                              MASS::bandwidth.nrd(data$y))
+                                          h=c(KernSmooth::dpik(data$x),
+                                              KernSmooth::dpik(data$y))
+                                          if(0 %in% h){
+                                              h=ifelse(max(h) != 0, max(h), 1)
+                                          }
                                       }
+
 
                                       if(length(is.na(n)) == 0 | length(n) != 2){
 
@@ -65,7 +71,8 @@ StatPseudocolor <- ggplot2::ggproto("StatPseudocolor", ggplot2::Stat,
                                                                  gridsize = n)
                                       grid <- list(x = dens$x1, y = dens$x2, z = dens$fhat)
                                       data$density <- fields::interp.surface(grid, cbind(data$x, data$y))
-                                      dplyr::arrange(data, density)
+                                      data
+                                      #dplyr::arrange(data, density)
                                   }
 )
 
@@ -103,10 +110,11 @@ StatNNCount <- ggplot2::ggproto("StatNNCount", ggplot2::Stat,
                                                                         scale(as.numeric(data$y))),
                                                              k = k)
 
+                               # sets arbitrary disance threshold
                                if(length(is.na(r)) == 0){
                                    r =  quantile(neighbour_dist$nn.dist[,1], 0.75)
 
-                                   cat(paste0("Cutoff Distance: ", r))
+                                   cat(paste0("No Cutoff Set,\nDefault Cutoff Distance: ", r))
                                }
 
                                counts = apply(neighbour_dist$nn.dist, FUN=function(x){
@@ -129,10 +137,10 @@ StatNNCount <- ggplot2::ggproto("StatNNCount", ggplot2::Stat,
 #' @param k Number of nearest neighbours
 #' @param r Maximum distance to classify as nearest neighbour
 #' @param stat Four possible options:  \c
-#'  pseudocolor: calculates densitites as a continuous spectrum, requires bins, n, hr
+#'  kde: calculates densitites as a continuous spectrum, requires bins, n, hr
 #'  pseudocolor_binned: groups densities into bins, requires bins, n, h \cr
 #'  pseudocolor_nn: calculates euclidan distance of nearest neighbours, requires k \cr
-#'  pseudocolor_nn_count: counts number nearest neighbours, requires k, r
+#'  pseudocolor_count: counts number nearest neighbours, requires k, r
 #' @import ggplot2
 #' @importFrom utils modifyList
 #' @export
@@ -233,11 +241,15 @@ scale_color_flowjo <- function(...) {
     ggplot2::scale_color_gradientn(colors = flowjo_colors(), ...)
 }
 
-#' Continuous color palette for flowjo colors
+#' Discrete color palette for flowjo colors
 #'
 #' @import ggplot2
 #' @export
 scale_color_flowjo_discrete <- function(...) {
-    ggplot2::scale_color_manual(values = flowjo_colors(5), ...)
+    ggplot2::discrete_scale(
+        "colour",
+        "flowjo",
+        palette = function(n) flowjo_colors(n),
+        ...
+    )
 }
-
