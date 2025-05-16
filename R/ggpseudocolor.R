@@ -7,7 +7,7 @@
 StatPseudcolorBinned <- ggplot2::ggproto("StatPseudcolorBinned", ggplot2::Stat,
                                   required_aes = c("x", "y"),
                                   compute_group = function(data, scales, bins = 5,
-                                                           n = 100, h = NULL) {
+                                                           n = 100, h = NULL, adjust=1) {
                                       if(length(is.na(h)) == 0){
                                           h=c(KernSmooth::dpik(data$x),
                                               KernSmooth::dpik(data$y))
@@ -15,6 +15,8 @@ StatPseudcolorBinned <- ggplot2::ggproto("StatPseudcolorBinned", ggplot2::Stat,
                                               h=ifelse(max(h) != 0, max(h), 1)
                                           }
                                       }
+
+                                      h=adjust * h
 
 
                                       if(length(is.na(n)) == 0 | length(n) != 2){
@@ -58,6 +60,8 @@ StatPseudocolor <- ggplot2::ggproto("StatPseudocolor", ggplot2::Stat,
                                               h=ifelse(max(h) != 0, max(h), 1)
                                           }
                                       }
+                                      h=adjust * h
+
 
 
                                       if(length(is.na(n)) == 0 | length(n) != 2){
